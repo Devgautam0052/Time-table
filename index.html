@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SmartTime - Live Timetable</title>
+  <meta name="theme-color" content="#020617">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3106/3106176.png">
+</head>
+<body class="bg-slate-950">
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    // Icons (Converted for Browser)
+    const Clock = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+    const Calendar = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
+    const MapPin = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+    const BookOpen = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>;
+    const User = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+    const ChevronRight = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>;
+    const PlayCircle = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>;
+    const Info = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>;
+    const Coffee = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>;
+    const CheckCircle = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>;
+    const Timer = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>;
+    const Activity = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+
+    const timetableData = {
+      "Monday": [
+        { start: "09:30", end: "10:25", subject: "CNE", teacher: "Ms. Anu Sharma", room: "103, E1" },
+        { start: "10:25", end: "11:20", subject: "UI", teacher: "TBA", room: "TBA" },
+        { start: "11:20", end: "12:15", subject: "EN", teacher: "Ms. Monika Gupta", room: "103, E1" },
+        { start: "12:15", end: "13:10", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "211, E1 / 304, E2" },
+        { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
+        { start: "13:40", end: "14:35", subject: "AML", teacher: "Ms. Ritu Rana", room: "103, E1" },
+        { start: "14:35", end: "15:30", subject: "TOC", teacher: "Mr. Rajneesh", room: "302, E1" },
+        { start: "15:30", end: "17:20", subject: "CDA-LAB", teacher: "Ms. Shallu Yadav", room: "201, E1" }
+      ],
+      "Tuesday": [
+        { start: "09:30", end: "11:20", subject: "DAA-LAB (G1)", teacher: "Dr. Monika Jangra", room: "001, E1" },
+        { start: "11:20", end: "13:10", subject: "MP-II", teacher: "Dr. Sushant", room: "001, E1" },
+        { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
+        { start: "13:40", end: "15:30", subject: "MP-II", teacher: "Dr. Sushant", room: "001, E1" },
+        { start: "15:30", end: "16:25", subject: "DAA", teacher: "Ms. Shivani", room: "302, E1" },
+        { start: "16:25", end: "17:20", subject: "Library", teacher: "Self Study", room: "Library", isFree: true }
+      ],
+      "Wednesday": [
+        { start: "09:30", end: "11:20", subject: "AML-LAB (G1) / CNE-LAB (G2)", teacher: "Ms. Ritu Rana / Dr. Anu Chaudhary", room: "201, E1 / 303, E1" },
+        { start: "11:20", end: "12:15", subject: "CNE", teacher: "Ms. Anu Sharma", room: "302, E1" },
+        { start: "12:15", end: "13:10", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "211, E1 / 304, E2" },
+        { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
+        { start: "13:40", end: "14:35", subject: "DAA", teacher: "Ms. Shivani", room: "304, E1" },
+        { start: "14:35", end: "15:30", subject: "Library", teacher: "Self Study", room: "Library", isFree: true },
+        { start: "15:30", end: "16:25", subject: "EN-TUT", teacher: "Ms. Monika Gupta", room: "103, E1" },
+        { start: "16:25", end: "17:20", subject: "Library", teacher: "Self Study", room: "Library", isFree: true }
+      ],
+      "Thursday": [
+        { start: "09:30", end: "11:20", subject: "CNE-LAB (G1) / AML-LAB (G2)", teacher: "Dr. Anu Chaudhary / Ms. Ritu Rana", room: "303, E1 / 201, E1" },
+        { start: "11:20", end: "12:15", subject: "AML", teacher: "Ms. Ritu Rana", room: "103, E1" },
+        { start: "12:15", end: "13:10", subject: "TOC", teacher: "Mr. Rajneesh", room: "103, E1" },
+        { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
+        { start: "13:40", end: "14:35", subject: "DAA", teacher: "Ms. Shivani", room: "302, E1" },
+        { start: "14:35", end: "15:30", subject: "CNE", teacher: "Ms. Anu Sharma", room: "302, E1" },
+        { start: "15:30", end: "16:25", subject: "TOC", teacher: "Mr. Rajneesh", room: "302, E1" },
+        { start: "16:25", end: "17:20", subject: "Library", teacher: "Self Study", room: "Library", isFree: true }
+      ],
+      "Friday": [
+        { start: "09:30", end: "10:25", subject: "Library", teacher: "Self Study", room: "Library", isFree: true },
+        { start: "10:25", end: "11:20", subject: "AML", teacher: "Ms. Ritu Rana", room: "302, E1" },
+        { start: "11:20", end: "12:15", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "211, E1 / 210, E1" },
+        { start: "12:15", end: "13:10", subject: "Library", teacher: "Self Study", room: "Library", isFree: true },
+        { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
+        { start: "13:40", end: "14:35", subject: "UI", teacher: "TBA", room: "TBA" },
+        { start: "14:35", end: "15:30", subject: "TOC", teacher: "Mr. Rajneesh", room: "302, E1" },
+        { start: "15:30", end: "17:20", subject: "DAA-LAB (G2)", teacher: "Ms. Bharti", room: "001, E1" }
+      ]
+    };
+
+    const timeToMinutes = (timeStr) => {
+      if (!timeStr) return 0;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const formatTo12Hour = (time24) => {
+      if (!time24) return "";
+      const [hourStr, minuteStr] = time24.split(':');
+      let hour = parseInt(hourStr, 10);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      return `${hour}:${minuteStr} ${ampm}`;
+    };
+
+    const formatLiveTime = (date) => {
+      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+    };
+
+    const getDayName = (date) => {
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    };
+
+    const App = () => {
+      const [realTime, setRealTime] = useState(new Date());
+      const [isSimulating, setIsSimulating] = useState(false);
+      const [simulatedMinutes, setSimulatedMinutes] = useState(570);
+      const [simulatedDay, setSimulatedDay] = useState("Monday");
+      const [activeDayTab, setActiveDayTab] = useState("Monday");
+
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setRealTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      const currentDay = isSimulating ? simulatedDay : getDayName(realTime);
+      const activeMinutes = isSimulating ? simulatedMinutes : realTime.getHours() * 60 + realTime.getMinutes();
+      const isWeekend = currentDay === 'Saturday' || currentDay === 'Sunday';
+
+      useEffect(() => {
+        if (!isWeekend && timetableData[currentDay]) {
+          setActiveDayTab(currentDay);
+        } else {
+          setActiveDayTab("Monday");
+        }
+      }, [currentDay, isWeekend]);
+
+      const scheduleForToday = timetableData[currentDay] || [];
+      
+      let currentClass = null;
+      let nextClass = null;
+      let classesOver = false;
+      let progressPercentage = 0;
+      let minsRemaining = 0;
+
+      if (!isWeekend && scheduleForToday.length > 0) {
+        const lastClassEnd = timeToMinutes(scheduleForToday[scheduleForToday.length - 1].end);
+
+        if (activeMinutes >= lastClassEnd) {
+          classesOver = true;
+        } else {
+          for (let i = 0; i < scheduleForToday.length; i++) {
+            const cls = scheduleForToday[i];
+            const startMins = timeToMinutes(cls.start);
+            const endMins = timeToMinutes(cls.end);
+
+            if (activeMinutes >= startMins && activeMinutes < endMins) {
+              currentClass = cls;
+              const totalDuration = endMins - startMins;
+              const elapsed = activeMinutes - startMins;
+              progressPercentage = (elapsed / totalDuration) * 100;
+              minsRemaining = endMins - activeMinutes;
+
+              let nextIdx = i + 1;
+              if (nextIdx < scheduleForToday.length) {
+                 nextClass = scheduleForToday[nextIdx];
+              }
+              break;
+            } else if (activeMinutes < startMins && !currentClass) {
+              nextClass = cls;
+              minsRemaining = startMins - activeMinutes;
+              break;
+            }
+          }
+        }
+      }
+
+      const simHours = Math.floor(simulatedMinutes / 60);
+      const simMins = simulatedMinutes % 60;
+      const simTimeString = `${String(simHours).padStart(2, '0')}:${String(simMins).padStart(2, '0')}`;
+      
+      const isFreeSlot = currentClass?.isFree;
+      const isLunchBreak = currentClass?.isBreak;
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500/30 pb-20">
+          <nav className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60 shadow-lg">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
+                   {!isSimulating && <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                   </span>}
+                  <Activity className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                    SmartTime <span className="text-sm font-normal text-slate-500">Live</span>
+                  </h1>
+                  <p className="text-[10px] sm:text-xs text-indigo-400 font-semibold tracking-wider uppercase">
+                    B.Tech CSE • 5th Semester
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-sm font-medium">
+                <button onClick={() => setIsSimulating(!isSimulating)} className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-2 ${isSimulating ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}>
+                  <PlayCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">{isSimulating ? 'Exit Demo' : 'Try Demo Mode'}</span>
+                  <span className="sm:hidden">{isSimulating ? 'Exit' : 'Demo'}</span>
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+            <div className="flex flex-col items-center justify-center py-2 animate-in fade-in zoom-in duration-500">
+              <div className="text-slate-400 font-medium tracking-widest uppercase text-sm mb-2 flex items-center gap-2">
+                <Clock className="w-4 h-4" /> Current Time
+              </div>
+              <div className={`text-5xl sm:text-7xl font-black tracking-tighter drop-shadow-2xl tabular-nums ${isSimulating ? 'text-orange-400' : 'bg-clip-text text-transparent bg-gradient-to-br from-white to-slate-400'}`}>
+                {isSimulating ? formatTo12Hour(simTimeString) : formatLiveTime(realTime)}
+              </div>
+              <div className="mt-3 px-4 py-1 rounded-full bg-slate-900 border border-slate-800 text-indigo-400 font-semibold text-sm shadow-inner">
+                {currentDay}, {isSimulating ? 'Simulation Mode' : realTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </div>
+            </div>
+
+            {isSimulating && (
+              <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 mb-8 animate-in fade-in slide-in-from-top-4">
+                <div className="flex items-center gap-2 mb-4 text-indigo-300 font-medium">
+                  <Info className="w-5 h-5" />
+                  <h3>Demo Mode Active: Drag slider to change time</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">Select Day</label>
+                    <select className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors" value={simulatedDay} onChange={(e) => setSimulatedDay(e.target.value)}>
+                      {Object.keys(timetableData).map(day => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">Adjust Time: <span className="font-bold text-indigo-400">{formatTo12Hour(simTimeString)}</span></label>
+                    <input type="range" min="480" max="1100" value={simulatedMinutes} onChange={(e) => setSimulatedMinutes(parseInt(e.target.value))} className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 mt-3" />
+                    <div className="flex justify-between text-xs text-slate-500 mt-2 font-mono"><span>8:00 AM</span><span>6:20 PM</span></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl">
+              <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+              
+              <div className="relative p-6 sm:p-10">
+                <div className="mb-6 flex justify-between items-center border-b border-slate-800/50 pb-4">
+                   <h2 className="text-xl font-medium text-slate-300">{currentDay}'s Schedule</h2>
+                   <div className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider border ${isSimulating ? 'bg-orange-950 text-orange-500 border-orange-500/30' : 'bg-slate-950 text-slate-500 border-slate-800'}`}>
+                      {isSimulating ? 'SIMULATION' : 'LIVE'}
+                   </div>
+                </div>
+
+                {isWeekend ? (
+                  <div className="text-center py-10">
+                    <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700/50"><Coffee className="w-10 h-10 text-slate-400" /></div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Weekend Vibes!</h2>
+                    <p className="text-slate-400 text-lg">No classes today. Relax and enjoy your day!</p>
+                  </div>
+                ) : classesOver ? (
+                  <div className="text-center py-10">
+                    <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20"><CheckCircle className="w-10 h-10 text-green-400" /></div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Classes are over for today!</h2>
+                    <p className="text-slate-400 text-lg">Great job today. Time to rest or self-study.</p>
+                  </div>
+                ) : currentClass && !isLunchBreak && !isFreeSlot ? (
+                  <div className="animate-in fade-in zoom-in-95 duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>
+                        <span className="text-red-400 font-semibold tracking-wide uppercase text-sm">Happening Now</span>
+                      </div>
+                      <div className="bg-slate-950 border border-slate-800 px-4 py-2 rounded-lg text-sm text-slate-300 flex items-center gap-2 shadow-inner">
+                         <Timer className="w-4 h-4 text-indigo-400" /> Ends in <span className="font-bold text-white text-lg">{minsRemaining} mins</span>
+                      </div>
+                    </div>
+                    <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6 tracking-tight drop-shadow-md">{currentClass.subject}</h2>
+                    <div className="w-full bg-slate-950 rounded-full h-3 mb-8 border border-slate-800 overflow-hidden shadow-inner">
+                      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-1000 ease-linear relative" style={{ width: `${progressPercentage}%` }}>
+                        <div className="absolute top-0 right-0 bottom-0 w-10 bg-white/20 blur-md"></div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                      <div className="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80 flex items-center gap-4 hover:border-slate-700 transition-colors"><div className="bg-blue-500/10 p-3 rounded-xl"><User className="w-6 h-6 text-blue-400" /></div><div><p className="text-xs text-slate-400 font-medium mb-1">Teacher</p><p className="font-semibold text-slate-200">{currentClass.teacher}</p></div></div>
+                      <div className="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80 flex items-center gap-4 hover:border-slate-700 transition-colors"><div className="bg-purple-500/10 p-3 rounded-xl"><MapPin className="w-6 h-6 text-purple-400" /></div><div><p className="text-xs text-slate-400 font-medium mb-1">Room</p><p className="font-semibold text-slate-200">{currentClass.room}</p></div></div>
+                      <div className="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80 flex items-center gap-4 hover:border-slate-700 transition-colors"><div className="bg-amber-500/10 p-3 rounded-xl"><Clock className="w-6 h-6 text-amber-400" /></div><div><p className="text-xs text-slate-400 font-medium mb-1">Time</p><p className="font-semibold text-slate-200">{formatTo12Hour(currentClass.start)} - {formatTo12Hour(currentClass.end)}</p></div></div>
+                    </div>
+                  </div>
+                ) : isLunchBreak ? (
+                   <div className="text-center py-8 animate-in fade-in">
+                    <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-orange-500/20 shadow-[0_0_30px_rgba(249,115,22,0.15)]"><Coffee className="w-10 h-10 text-orange-400" /></div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Lunch Break</h2>
+                    <p className="text-slate-400 text-lg mb-6">Enjoy your meal and take a rest!</p>
+                    <div className="inline-flex flex-col sm:flex-row gap-4 items-center justify-center bg-slate-950/80 px-6 py-4 rounded-2xl border border-slate-800">
+                      <div className="flex items-center gap-2 text-slate-300"><Timer className="w-5 h-5 text-orange-400" /><span className="font-medium">Ends in <span className="font-bold text-white text-lg">{minsRemaining} mins</span></span></div>
+                      <div className="hidden sm:block w-px h-6 bg-slate-800"></div><div className="text-slate-400 text-sm">Back at {formatTo12Hour(currentClass.end)}</div>
+                    </div>
+                  </div>
+                ) : isFreeSlot ? (
+                   <div className="text-center py-8 animate-in fade-in">
+                    <div className="w-20 h-20 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-teal-500/20 shadow-[0_0_30px_rgba(20,184,166,0.15)]"><BookOpen className="w-10 h-10 text-teal-400" /></div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Free Slot / Library</h2>
+                    <p className="text-slate-400 text-lg mb-6">Time for self-study or assignments.</p>
+                    <div className="inline-flex flex-col sm:flex-row gap-4 items-center justify-center bg-slate-950/80 px-6 py-4 rounded-2xl border border-slate-800">
+                      <div className="flex items-center gap-2 text-slate-300"><Timer className="w-5 h-5 text-teal-400" /><span className="font-medium">Ends in <span className="font-bold text-white text-lg">{minsRemaining} mins</span></span></div>
+                      <div className="hidden sm:block w-px h-6 bg-slate-800"></div><div className="text-slate-400 text-sm">{formatTo12Hour(currentClass.start)} - {formatTo12Hour(currentClass.end)}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center sm:text-left flex flex-col sm:flex-row items-center gap-6">
+                    <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center border border-indigo-500/20 flex-shrink-0"><Calendar className="w-8 h-8 text-indigo-400" /></div>
+                    <div><h2 className="text-3xl font-bold text-white mb-2">Good Morning!</h2><p className="text-slate-400">Classes haven't started yet for today.</p></div>
+                  </div>
+                )}
+
+                {nextClass && (
+                  <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 rounded-b-3xl">
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-500 text-sm font-bold uppercase tracking-wider bg-slate-950 px-3 py-1 rounded-md border border-slate-800">Up Next</span>
+                      <div className="flex items-center gap-2 text-indigo-300"><ChevronRight className="w-4 h-4" /><span className="font-bold text-lg">{nextClass.subject}</span>{!nextClass.isBreak && !nextClass.isFree && <span className="text-indigo-400/70 text-sm bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">in {nextClass.room}</span>}</div>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      {!currentClass && <span className="text-sm">Starts in <strong className="text-white">{minsRemaining} mins</strong> at</span>}
+                      <span className="text-white font-bold bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">{formatTo12Hour(nextClass.start)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+              <div className="p-6 border-b border-slate-800 bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2"><Calendar className="w-5 h-5 text-indigo-400" /> Full Timetable</h3>
+              </div>
+              <div className="flex overflow-x-auto hide-scrollbar border-b border-slate-800 bg-slate-950/50 px-2 py-2 gap-2">
+                {Object.keys(timetableData).map(day => (
+                  <button key={day} onClick={() => setActiveDayTab(day)} className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap flex-shrink-0 ${activeDayTab === day ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}>
+                    {day}
+                    {day === currentDay && <span className="ml-2 w-2 h-2 inline-block rounded-full bg-green-400 animate-pulse"></span>}
+                  </button>
+                ))}
+              </div>
+              <div className="p-4 sm:p-6 bg-slate-900">
+                <div className="space-y-3">
+                  {timetableData[activeDayTab] && timetableData[activeDayTab].length > 0 ? (
+                    timetableData[activeDayTab].map((cls, idx) => {
+                      const isActive = activeDayTab === currentDay && currentClass === cls;
+                      if (cls.isBreak) {
+                        return (
+                          <div key={idx} className="bg-orange-950/20 border border-orange-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-center gap-3 text-orange-400/90 shadow-inner"><Coffee className="w-5 h-5" /><span className="font-bold tracking-wider">{cls.subject}</span><span className="text-sm font-medium bg-orange-500/10 px-3 py-1 rounded-md border border-orange-500/20">{formatTo12Hour(cls.start)} - {formatTo12Hour(cls.end)}</span></div>
+                        );
+                      }
+                      if (cls.isFree) {
+                        return (
+                          <div key={idx} className={`relative flex flex-col sm:flex-row gap-4 p-4 sm:p-5 rounded-2xl border transition-all ${isActive ? 'bg-teal-900/30 border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.15)] ring-1 ring-teal-500/30' : 'bg-slate-950/60 border-slate-800/80 hover:border-teal-500/30 hover:bg-slate-900'}`}>
+                            {isActive && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-teal-500 rounded-l-2xl shadow-[0_0_10px_rgba(20,184,166,0.8)]"></div>}
+                            <div className="flex-shrink-0 sm:w-40 flex flex-col justify-center border-l-2 sm:border-l-0 sm:border-r border-teal-500/50 sm:border-slate-800 pl-3 sm:pl-0 sm:pr-6"><span className={`font-bold text-lg ${isActive ? 'text-teal-300' : 'text-slate-300'}`}>{formatTo12Hour(cls.start)}</span><span className="text-slate-500 text-sm font-medium">{formatTo12Hour(cls.end)}</span></div>
+                            <div className="flex items-center gap-3 text-teal-400/90"><BookOpen className="w-5 h-5" /><span className="font-bold text-lg">{cls.subject} (Free Slot)</span></div>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={idx} className={`relative flex flex-col sm:flex-row gap-4 p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${isActive ? 'bg-indigo-900/30 border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.2)] ring-1 ring-indigo-500/30' : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80'}`}>
+                          {isActive && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500 rounded-l-2xl shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>}
+                          <div className="flex-shrink-0 sm:w-40 flex flex-col justify-center border-l-2 sm:border-l-0 sm:border-r border-indigo-500/50 sm:border-slate-800 pl-3 sm:pl-0 sm:pr-6"><span className={`font-bold text-lg tabular-nums tracking-tight ${isActive ? 'text-indigo-300' : 'text-slate-300'}`}>{formatTo12Hour(cls.start)}</span><span className="text-slate-500 text-sm font-medium tabular-nums">{formatTo12Hour(cls.end)}</span></div>
+                          <div className="flex-grow flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><h4 className={`text-xl font-bold mb-1.5 ${isActive ? 'text-white' : 'text-slate-200'}`}>{cls.subject}</h4><div className="flex items-center gap-2 text-slate-400 text-sm font-medium bg-slate-900/50 inline-flex px-2 py-1 rounded-md border border-slate-800"><User className="w-4 h-4" />{cls.teacher}</div></div><div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border ${isActive ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30' : 'bg-slate-900 text-slate-400 border-slate-800'}`}><MapPin className="w-4 h-4" />{cls.room}</div></div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-12 text-slate-500 font-medium">No classes scheduled for this day.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </main>
+          <style dangerouslySetInnerHTML={{__html: `.hide-scrollbar::-webkit-scrollbar {display: none;} .hide-scrollbar {-ms-overflow-style: none; scrollbar-width: none;}`}} />
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('Service Worker Registered'))
+          .catch(err => console.log('SW Registration failed: ', err));
+      });
+    }
+  </script>
+</body>
+</html>
