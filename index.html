@@ -32,20 +32,21 @@
     const Timer = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>;
     const Activity = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 
+    // Naya Updated Timetable Data
     const timetableData = {
       "Monday": [
-        { start: "09:30", end: "10:25", subject: "CNE", teacher: "Ms. Anu Sharma", room: "103, E1" },
-        { start: "10:25", end: "11:20", subject: "UI", teacher: "TBA", room: "TBA" },
+        { start: "09:30", end: "10:25", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "103, E1 / 304, E2" },
+        { start: "10:25", end: "11:20", subject: "Library", teacher: "Self Study", room: "Library", isFree: true },
         { start: "11:20", end: "12:15", subject: "EN", teacher: "Ms. Monika Gupta", room: "103, E1" },
-        { start: "12:15", end: "13:10", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "211, E1 / 304, E2" },
+        { start: "12:15", end: "13:10", subject: "CNE", teacher: "Ms. Anu Sharma", room: "302, E1" },
         { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
         { start: "13:40", end: "14:35", subject: "AML", teacher: "Ms. Ritu Rana", room: "103, E1" },
         { start: "14:35", end: "15:30", subject: "TOC", teacher: "Mr. Rajneesh", room: "302, E1" },
         { start: "15:30", end: "17:20", subject: "CDA-LAB", teacher: "Ms. Shallu Yadav", room: "201, E1" }
       ],
       "Tuesday": [
-        { start: "09:30", end: "11:20", subject: "DAA-LAB (G1)", teacher: "Dr. Monika Jangra", room: "001, E1" },
-        { start: "11:20", end: "13:10", subject: "MP-II", teacher: "Dr. Sushant", room: "001, E1" },
+        { start: "09:30", end: "11:20", subject: "DAA-LAB (G1)", teacher: "Dr. Jailata", room: "001, E1" },
+        { start: "11:20", end: "13:10", subject: "MP-II (G1) / DAA-LAB (G2)", teacher: "Dr. Sushant / Ms. Bharti", room: "001, E1 / 303, E1" },
         { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
         { start: "13:40", end: "15:30", subject: "MP-II", teacher: "Dr. Sushant", room: "001, E1" },
         { start: "15:30", end: "16:25", subject: "DAA", teacher: "Ms. Shivani", room: "302, E1" },
@@ -57,7 +58,7 @@
         { start: "12:15", end: "13:10", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "211, E1 / 304, E2" },
         { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
         { start: "13:40", end: "14:35", subject: "DAA", teacher: "Ms. Shivani", room: "304, E1" },
-        { start: "14:35", end: "15:30", subject: "Library", teacher: "Self Study", room: "Library", isFree: true },
+        { start: "14:35", end: "15:30", subject: "UI", teacher: "Ms. Tharmesh", room: "304, E1" },
         { start: "15:30", end: "16:25", subject: "EN-TUT", teacher: "Ms. Monika Gupta", room: "103, E1" },
         { start: "16:25", end: "17:20", subject: "Library", teacher: "Self Study", room: "Library", isFree: true }
       ],
@@ -77,9 +78,9 @@
         { start: "11:20", end: "12:15", subject: "CDA / SDW", teacher: "Ms. Shallu Yadav", room: "211, E1 / 210, E1" },
         { start: "12:15", end: "13:10", subject: "Library", teacher: "Self Study", room: "Library", isFree: true },
         { start: "13:10", end: "13:40", subject: "LUNCH BREAK", teacher: "-", room: "-", isBreak: true },
-        { start: "13:40", end: "14:35", subject: "UI", teacher: "TBA", room: "TBA" },
-        { start: "14:35", end: "15:30", subject: "TOC", teacher: "Mr. Rajneesh", room: "302, E1" },
-        { start: "15:30", end: "17:20", subject: "DAA-LAB (G2)", teacher: "Ms. Bharti", room: "001, E1" }
+        { start: "13:40", end: "14:35", subject: "TOC", teacher: "Mr. Rajneesh", room: "302, E1" },
+        { start: "14:35", end: "15:30", subject: "UI", teacher: "Ms. Tharmesh", room: "302, E1" },
+        { start: "15:30", end: "17:20", subject: "Library", teacher: "Self Study", room: "Library", isFree: true }
       ]
     };
 
